@@ -14,7 +14,7 @@ TEST_CASE ( "Basic robot functions:" ) {
         CHECK( r.get_t()     == 0.1f);
         CHECK( r.get_x()     == 1.0f);
         CHECK( r.get_y()     == 2.3f);
-        CHECK( r.get_theta() ==  float(-M_PI / 2));
+        CHECK( r.get_theta() == float(-M_PI / 2));
         CHECK( r.get_v()     == 0.5f);
         CHECK( r.get_w()     == float(M_PI / 10));
     }
