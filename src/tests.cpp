@@ -68,10 +68,12 @@ TEST_CASE ( "Basic robot functions:" ) {
     }
 
     SECTION ( "Check wrap on initialization" ) {
+        Utils u;
         double margin = 0.000000001; // margin for error to do double and float comparisons
-        Robot q("kat bot 2" , 0.1, 1.0, 2.3, 0.75 * M_PI, 0.5, 4.1 * M_PI);
+        Robot q("kat bot 2" , 0.1, 1.0, 2.3, -11.3 * M_PI, 0.5, 4.1 * M_PI);
 
-        CHECK ( r.get_w() == Approx(q.get_w()).margin(margin) );
+        CHECK ( u.wrap_angle(-11.3 * M_PI) == Approx(q.get_theta()).margin(margin) );
+        CHECK ( u.wrap_angle(4.1 * M_PI) == Approx(q.get_w()).margin(margin) );
     }
 
     SECTION ( "Output functions") {

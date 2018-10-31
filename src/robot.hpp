@@ -46,7 +46,7 @@ Robot::Robot(string name_, float t_, float x_, float y_, float theta_, float v_,
     t = t_;
     x = x_;
     y = y_;
-    theta = theta_;
+    theta = u.wrap_angle(theta_);
     v = v_;
     w = u.wrap_angle(w_);
 
