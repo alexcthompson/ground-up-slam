@@ -2,28 +2,23 @@ A small repo to conduct some ground up SLAM experiments, and for me to hone my C
 
 # TODO
 
-- [x] write up robot class including
-    - [x] ground truth
-    - [x] v, w
-    - [x] print robot location
-    - [x] update position
-- [x] write up main loop with iteration ... make robot go in a circle or something
-- [x] set up testing
-- [ ] write output function tests
-    - [ ] redirecting output
+- [ ] theta wrapping on initialization
+    - [ ] red
+    - [ ] green
+    - [ ] refactor
+- [ ] convert Robot to Eigen for state vector et al
+- [ ] test initialization with wrapping values
 - [ ] write movement function tests
-- [ ] do angle normalization via utils file
 - [ ] add angle normalization to theta at end of update step
 - [ ] figure out setw for robot status printing
-- [ ] convert Robot to Eigen approach
 - [ ] test that when you initialize, it doesn't fail
+- [ ] change up print statements so they will form a csv record
+- [ ] deal with excess print statements ... remove or silence during tests
 
 ## later, nth, as needed, notes
 
-- For approximate matches see: https://github.com/catchorg/Catch2/blob/master/docs/assertions.md#natural-expressions, under floating point comparisons
 - [ ] Set up Cmake file
 - [ ] Sort out slow compiles: https://github.com/catchorg/Catch2/blob/master/docs/slow-compiles.md#top
-- [ ] See if Ben can walk through this: https://github.com/catchorg/Catch2/blob/master/examples/231-Cfg-OutputStreams.cpp
 
 # Design
 

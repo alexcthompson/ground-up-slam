@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -12,6 +13,7 @@ class Robot {
         float theta; // robot's facing direction
         float v;     // velocity in meters / second
         float w;     // angular velocity in radians
+        Utils u;
     public:
         Robot(string name_, float t_, float x_, float y_, float theta_, float v_, float w_);
         string get_name();
@@ -46,7 +48,7 @@ Robot::Robot(string name_, float t_, float x_, float y_, float theta_, float v_,
     y = y_;
     theta = theta_;
     v = v_;
-    w = w_;
+    w = u.wrap_angle(w_);
 
     cout << "Robot " << name << " initialized!" << endl;
     print_status();
