@@ -1,93 +1,105 @@
+#ifndef ROBOT
+#define ROBOT
+
 #include <cmath>
 #include <iostream>
+#include "Eigen/Dense"
 #include "utils.hpp"
 
 using namespace std;
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 class Robot {
     private:
+        int robot_dims = 5; // gives the dimensions of the robot state, all other dims are for the map
         string name;
-        float t;     // last update
-        float x;     // meters
-        float y;     // meters
-        float theta; // robot's facing direction
-        float v;     // velocity in meters / second
-        float w;     // angular velocity in radians
+        double t;     // last update
+        VectorXd state = VectorXd::Constant(5, -666); // full state, including mappoint coordinates
         Utils u;
     public:
-        Robot(string name_, float t_, float x_, float y_, float theta_, float v_, float w_);
+        Robot(string name_, double t_, double x_, double y_, double theta_, double v_, double w_);
+        int get_robot_dims();
         string get_name();
-        float get_t();
-        float get_x();
-        float get_y();
-        float get_theta();
-        float get_v();
-        float get_w();
+        VectorXd get_robot_state();
+        double get_t();
+        double get_x();
+        double get_y();
+        double get_theta();
+        double get_v();
+        double get_w();
         void print_status();
-        void update_state(float new_t);
+        void update_state(double new_t);
 };
 
 void Robot::print_status()
 {
     cout << "Robot " << name << ":  "
          <<   "t = " << t
-         << "; x = " << x
-         << "; y = " << y
-         << "; theta = " << theta
-         << "; v = " << v
-         << "; w = " << w
+         << "; x = " << state[0]
+         << "; y = " << state[1]
+         << "; theta = " << state[2]
+         << "; v = " << state[3]
+         << "; w = " << state[4]
          << endl;
 }
 
 
-Robot::Robot(string name_, float t_, float x_, float y_, float theta_, float v_, float w_)
+Robot::Robot(string name_, double t_, double x_, double y_, double theta_, double v_, double w_)
 {
     name = name_;
     t = t_;
-    x = x_;
-    y = y_;
-    theta = u.wrap_angle(theta_);
-    v = v_;
-    w = u.wrap_angle(w_);
+    state << x_,
+             y_,
+             u.wrap_angle(theta_),
+             v_,
+             u.wrap_angle(w_);
+}
 
-    cout << "Robot " << name << " initialized!" << endl;
-    print_status();
+int Robot::get_robot_dims() {
+    return robot_dims;
 }
 
 string Robot::get_name() {
     return name;
 }
 
-float Robot::get_t() {
+VectorXd Robot::get_robot_state() {
+    return state;
+}
+
+double Robot::get_t() {
     return t;
 }
 
-float Robot::get_x() {
-    return x;
+double Robot::get_x() {
+    return state(0);
 }
 
-float Robot::get_y() {
-    return y;
+double Robot::get_y() {
+    return state(1);
 }
 
-float Robot::get_theta() {
-    return theta;
+double Robot::get_theta() {
+    return state(2);
 }
 
-float Robot::get_v() {
-    return v;
+double Robot::get_v() {
+    return state(3);
 }
 
-float Robot::get_w() {
-    return w;
+double Robot::get_w() {
+    return state(4);
 }
 
-void Robot::update_state(float new_t)
+void Robot::update_state(double new_t)
 {
-    float dt = new_t - t;
+    double dt = new_t - t;
 
     t      = new_t;
-    x     += dt * v * cos(theta);
-    y     += dt * v * sin(theta);
-    theta += w * dt;
+    state[0] += dt * state[3] * cos(state[2]);
+    state[1] += dt * state[3] * sin(state[2]);
+    state[2] += state[4] * dt;
 }
+
+#endif // ROBOT

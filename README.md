@@ -2,14 +2,18 @@ A small repo to conduct some ground up SLAM experiments, and for me to hone my C
 
 # TODO
 
-- [ ] theta wrapping on initialization
+Status: writing dims check for state vector comparison, should revisit test writing as it may be wrong.
+
+- [ ] convert Robot to Eigen for state vector et al
     - [ ] red
+        - [ ] check dims first
+            - [ ] red
+            - [ ] green
+            - [ ] refactor
     - [ ] green
     - [ ] refactor
-- [ ] convert Robot to Eigen for state vector et al
 - [ ] test initialization with wrapping values
 - [ ] write movement function tests
-- [ ] add angle normalization to theta at end of update step
 - [ ] figure out setw for robot status printing
 - [ ] test that when you initialize, it doesn't fail
 - [ ] change up print statements so they will form a csv record
