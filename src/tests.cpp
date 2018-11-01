@@ -83,10 +83,10 @@ TEST_CASE ( "Basic robot functions:" ) {
         streambuf* old = cout.rdbuf(buffer.rdbuf());
 
         // reinitialize and collect buffer output
-        r.print_status();
+        r.print_robot_state();
 
         string buffer_output = buffer.str();
-        string expected_output = "Robot kat bot:  t = 0.1; x = 1; y = 2.3; theta = -1.5708; v = 0.5; w = 0.314159\n";
+        string expected_output = "\"kat bot\", 0.100000, 1.000000, 2.300000, -1.570796, 0.500000, 0.314159\n";
 
         CHECK( buffer_output == expected_output );
     }

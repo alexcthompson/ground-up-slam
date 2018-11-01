@@ -4,20 +4,7 @@ A small repo to conduct some ground up SLAM experiments, and for me to hone my C
 
 Status: writing dims check for state vector comparison, should revisit test writing as it may be wrong.
 
-- [ ] convert Robot to Eigen for state vector et al
-    - [ ] red
-        - [ ] check dims first
-            - [ ] red
-            - [ ] green
-            - [ ] refactor
-    - [ ] green
-    - [ ] refactor
-- [ ] test initialization with wrapping values
 - [ ] write movement function tests
-- [ ] figure out setw for robot status printing
-- [ ] test that when you initialize, it doesn't fail
-- [ ] change up print statements so they will form a csv record
-- [ ] deal with excess print statements ... remove or silence during tests
 
 ## later, nth, as needed, notes
 
@@ -56,4 +43,6 @@ Status: writing dims check for state vector comparison, should revisit test writ
 - log normal distributions for each
 - NTH: program distributions to bring the robot closer to a given point... a kind of gravity ... or a correction that brings them closer
 
-# Notes
+# Notes for a post
+
+- chose to make everything double for simplicity sake

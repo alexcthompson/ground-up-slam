@@ -2,6 +2,7 @@
 #define ROBOT
 
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 #include "Eigen/Dense"
 #include "utils.hpp"
@@ -17,6 +18,7 @@ class Robot {
         double t;     // last update
         VectorXd state = VectorXd::Constant(5, -666); // full state, including mappoint coordinates
         Utils u;
+
     public:
         Robot(string name_, double t_, double x_, double y_, double theta_, double v_, double w_);
         int get_robot_dims();
@@ -28,19 +30,20 @@ class Robot {
         double get_theta();
         double get_v();
         double get_w();
-        void print_status();
+        void print_robot_state();
         void update_state(double new_t);
 };
 
-void Robot::print_status()
+void Robot::print_robot_state()
 {
-    cout << "Robot " << name << ":  "
-         <<   "t = " << t
-         << "; x = " << state[0]
-         << "; y = " << state[1]
-         << "; theta = " << state[2]
-         << "; v = " << state[3]
-         << "; w = " << state[4]
+    cout << fixed << setprecision(6);
+    cout << "\"" << get_name() << "\", "
+         << get_t() << ", "
+         << get_x() << ", "
+         << get_y() << ", "
+         << get_theta() << ", "
+         << get_v() << ", "
+         << get_w()
          << endl;
 }
 
