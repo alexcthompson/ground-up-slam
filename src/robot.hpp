@@ -21,8 +21,10 @@ class Robot {
 
     public:
         Robot(string name_, double t_, double x_, double y_, double theta_, double v_, double w_);
+
         int get_robot_dims();
         string get_name();
+
         VectorXd get_robot_state();
         double get_t();
         double get_x();
@@ -30,13 +32,17 @@ class Robot {
         double get_theta();
         double get_v();
         double get_w();
-        void print_robot_state();
+
+        void print_robot_state(int precision);
+
+        void set_v(double new_v);
+        void set_w(double new_w);
         void update_state(double new_t);
 };
 
-void Robot::print_robot_state()
+void Robot::print_robot_state(int precision = 6)
 {
-    cout << fixed << setprecision(6);
+    cout << fixed << setprecision(precision);
     cout << "\"" << get_name() << "\", "
          << get_t() << ", "
          << get_x() << ", "
@@ -95,14 +101,30 @@ double Robot::get_w() {
     return state(4);
 }
 
-void Robot::update_state(double new_t)
-{
-    double dt = new_t - t;
+void Robot::set_v(double new_v) {
+    state(3) = new_v;
+}
 
-    t      = new_t;
-    state[0] += dt * state[3] * cos(state[2]);
-    state[1] += dt * state[3] * sin(state[2]);
-    state[2] += state[4] * dt;
+void Robot::set_w(double new_w) {
+    state(4) = new_w;
+}
+
+void Robot::update_state(double dt)
+{
+    t += dt;
+    double theta = state(2);
+    double v = state(3);
+    double w = state(4);
+
+    if (abs(get_w()) >= 0.001) {
+        state(0) += (v / w) * (-sin(theta) + sin(theta + w * dt));
+        state(1) += (v / w) * ( cos(theta) - cos(theta + w * dt));
+        state(2) += u.wrap_angle(w * dt);
+    }
+    else {
+        state(0) += v * dt * cos(theta);
+        state(1) += v * dt * sin(theta);
+    }
 }
 
 #endif // ROBOT
