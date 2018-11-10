@@ -8,34 +8,32 @@
 #include "robot.hpp"
 #include "utils.hpp"
 
-using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 TEST_CASE ( "Utils") {
-    Utils u;
 
     SECTION ( "Wrap angle tests" ) {
-        double margin = 0.000000001; // margin for error to do comparisons
+        double epsilon = 0.000000001; // margin for error to do comparisons
 
         double x = 1.414;
         double y = 10.0;
         double z = M_PI + 1;
-        CHECK ( u.wrap_angle(0.0) == 0.0);
-        CHECK ( u.wrap_angle(x) == x );
-        CHECK ( u.wrap_angle(y) == y - 4 * M_PI);
-        CHECK ( u.wrap_angle(z) == -M_PI + 1);
-        CHECK ( u.wrap_angle(M_PI) == M_PI );
-        CHECK ( u.wrap_angle(M_PI + 0.000000001) == -M_PI + 0.000000001 );
-        CHECK ( u.wrap_angle(M_PI - 0.000000001) == M_PI - 0.000000001 );
-        CHECK ( u.wrap_angle(-M_PI) == M_PI );
-        CHECK ( u.wrap_angle(-M_PI + 0.000000001) == -M_PI + 0.000000001 );
-        CHECK ( u.wrap_angle(-M_PI - 0.000000001) == M_PI - 0.000000001 );
+        CHECK ( wrap_angle(0.0) == 0.0);
+        CHECK ( wrap_angle(x) == x );
+        CHECK ( wrap_angle(y) == y - 4 * M_PI);
+        CHECK ( wrap_angle(z) == -M_PI + 1);
+        CHECK ( wrap_angle(M_PI) == M_PI );
+        CHECK ( wrap_angle(M_PI + epsilon) == -M_PI + epsilon );
+        CHECK ( wrap_angle(M_PI - epsilon) == M_PI - epsilon );
+        CHECK ( wrap_angle(-M_PI) == M_PI );
+        CHECK ( wrap_angle(-M_PI + epsilon) == -M_PI + epsilon );
+        CHECK ( wrap_angle(-M_PI - epsilon) == M_PI - epsilon );
 
         // check that multiples by integers are correct
-        CHECK ( u.wrap_angle(x + 6 * M_PI) == Approx(u.wrap_angle(x)).margin(margin) );
-        CHECK ( u.wrap_angle(y - 8 * M_PI) == Approx(u.wrap_angle(y)).margin(margin) );
-        CHECK ( u.wrap_angle(z + 1000 * M_PI) == Approx(u.wrap_angle(z)).margin(margin) );
+        CHECK ( wrap_angle(x + 6 * M_PI) == Approx(wrap_angle(x)).margin(epsilon) );
+        CHECK ( wrap_angle(y - 8 * M_PI) == Approx(wrap_angle(y)).margin(epsilon) );
+        CHECK ( wrap_angle(z + 1000 * M_PI) == Approx(wrap_angle(z)).margin(epsilon) );
     }
 }
 
@@ -58,49 +56,46 @@ TEST_CASE ( "Basic robot functions:" ) {
 
         // single variable checks
         CHECK( r.get_t()     == 0.1 );
+        CHECK( r.get_step()  == 0.05 );
         CHECK( r.get_x()     == 1.0 );
         CHECK( r.get_y()     == 2.3 );
         CHECK( r.get_theta() == -M_PI / 2 );
         CHECK( r.get_v()     == 0.5 );
         CHECK( r.get_w()     == M_PI / 10 );
+        CHECK( r.get_random_motion() == false );
+        CHECK( r.get_m_start() == 0.1);
+        CHECK( r.get_m_end() == 0.1);
+        CHECK( r.get_mu_v_strt() == log(13.41) );
+        CHECK( r.get_sig_v_strt() == log(2) / 2 );
+        CHECK( r.get_mu_dur_strt() == log(5) );
+        CHECK( r.get_sig_dur_strt() == log(2) );
     }
 
     SECTION ( "Check wrap on initialization" ) {
-        Utils u;
         double margin = 0.000000001; // margin for error to do comparisons
         Robot q("kat bot 2" , 0.1, 1.0, 2.3, -11.3 * M_PI, 0.5, 4.1 * M_PI);
 
-        CHECK ( u.wrap_angle(-11.3 * M_PI) == Approx(q.get_theta()).margin(margin) );
-        CHECK ( u.wrap_angle(4.1 * M_PI) == Approx(q.get_w()).margin(margin) );
+        CHECK ( wrap_angle(-11.3 * M_PI) == Approx(q.get_theta()).margin(margin) );
+        CHECK ( wrap_angle(4.1 * M_PI) == Approx(q.get_w()).margin(margin) );
     }
 
     SECTION ( "Output functions") {
         Robot r("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 10);
 
         // setup buffer capture
-        stringstream buffer;
+        std::stringstream buffer;
 
         // location of old buffer
-        streambuf* old = cout.rdbuf(buffer.rdbuf());
+        std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
 
-        // reinitialize and collect buffer output
-        r.print_robot_state();
+        std::cout << r;
+        std::string buffer_output = buffer.str();
 
-        string buffer_output = buffer.str();
-        string expected_output = "\"kat bot\", 0.100000, 1.000000, 2.300000, -1.570796, 0.500000, 0.314159\n";
-
-        CHECK( buffer_output == expected_output );
-
-        buffer.str(""); // clear buffer
-
-        r.print_robot_state(3);
-
-        buffer_output = buffer.str();
-        expected_output = "\"kat bot\", 0.100, 1.000, 2.300, -1.571, 0.500, 0.314\n";
+        std::string expected_output = "\"kat bot\", 0.100000, 1.000000, 2.300000, -1.570796, 0.500000, 0.314159\n";
 
         CHECK( buffer_output == expected_output );
 
-        cout.rdbuf(old);
+        std::cout.rdbuf(old);
     }
 
     SECTION ( "Setting v and w" ) {
@@ -176,9 +171,32 @@ TEST_CASE ( "Basic robot functions:" ) {
         expected_state << -4.410870846240, 7.793023599913, 2.513274122872, 0.500000000000, 0.000010000000;
         robot_state = r.get_robot_state();
         CHECK( robot_state.isApprox(expected_state) );
+
+        // STEP_FORWARD
+        Robot r2("kat bot 2", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 5);
+        r2.step_forward();
+        robot_state = r2.get_robot_state();
+        double robot_t = r2.get_t();
+
+        Robot r3("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 5);
+        r3.update_state(r3.get_step());
+
+        CHECK( robot_t == r3.get_t() );
+        CHECK( robot_state == r3.get_robot_state() );
     }
 
-    SECTION ( "Movement functions") {
+    SECTION ( "Random motions" ) {
+        Robot r("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 5);
 
+        SECTION ( "Random straight move" ) {
+            r.random_strt();
+
+            CHECK ( r.get_m_start() == 0.1 );
+            CHECK ( r.get_m_end() > 0.1 ); // statistical test, unlikely but not impossible to be false
+            CHECK ( r.get_v() > 1 ); // statistical test, unlikely but not impossible to be false
+            CHECK ( r.get_v() < 50 ); // statistical test, unlikely but not impossible to be false
+            CHECK ( r.get_w() == 0 );
+
+        }
     }
 }
