@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <stdexcept>
 #include "catch2/catch.hpp"
 #include "Eigen/Dense"
 #include "robot.hpp"
@@ -41,6 +42,7 @@ TEST_CASE ( "Basic robot functions:" ) {
 
     SECTION ( "Variable retrieval" ) {
         Robot r("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 10);
+        RobotEvolver evolver;
 
         CHECK( r.get_name() == "kat bot" );
 
@@ -56,19 +58,41 @@ TEST_CASE ( "Basic robot functions:" ) {
 
         // single variable checks
         CHECK( r.get_t()     == 0.1 );
-        CHECK( r.get_step()  == 0.05 );
         CHECK( r.get_x()     == 1.0 );
         CHECK( r.get_y()     == 2.3 );
         CHECK( r.get_theta() == -M_PI / 2 );
         CHECK( r.get_v()     == 0.5 );
         CHECK( r.get_w()     == M_PI / 10 );
-        CHECK( r.get_random_motion() == false );
-        CHECK( r.get_m_start() == 0.1);
-        CHECK( r.get_m_end() == 0.1);
-        CHECK( r.get_mu_v_strt() == log(13.41) );
-        CHECK( r.get_sig_v_strt() == log(2) / 2 );
-        CHECK( r.get_mu_dur_strt() == log(5) );
-        CHECK( r.get_sig_dur_strt() == log(2) );
+        CHECK( evolver.get_step() == 0.05 );
+    }
+
+    SECTION ( "Variable setting" ) {
+        Robot r("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 10);
+
+        r.set_t(3.14);
+        CHECK( r.get_t() == 3.14 );
+
+        // set v
+        r.set_v(22.1);
+        CHECK( r.get_v() == 22.1 );
+
+        r.set_v(0.5);
+        CHECK( r.get_v() == 0.5 );
+
+        // set w
+        r.set_w(-0.23 * M_PI);
+        CHECK( r.get_w() == -0.23 * M_PI );
+
+        r.set_w( M_PI / 10);
+        CHECK( r.get_w() == M_PI / 10 );
+
+        VectorXd expected_state(5);
+        expected_state << 1.1, 3.4, -2, 7.7, M_PI / 9;
+        r.set_state(expected_state);
+        CHECK( r.get_robot_state() == expected_state );
+
+        expected_state.resize(33);
+        REQUIRE_THROWS_WITH(r.set_state(expected_state), "Attempting to set new state with wrong dimensions");
     }
 
     SECTION ( "Check wrap on initialization" ) {
@@ -98,50 +122,33 @@ TEST_CASE ( "Basic robot functions:" ) {
         std::cout.rdbuf(old);
     }
 
-    SECTION ( "Setting v and w" ) {
-        Robot r("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 10);
-
-        // set v
-        r.set_v(22.1);
-        CHECK( r.get_v() == 22.1 );
-
-        r.set_v(0.5);
-        CHECK( r.get_v() == 0.5 );
-
-        // set w
-        r.set_w(-0.23 * M_PI);
-        CHECK( r.get_w() == -0.23 * M_PI );
-
-        r.set_w( M_PI / 10);
-        CHECK( r.get_w() == M_PI / 10 );
-    }
-
     SECTION ( "Updating state" ) {
         // note: w is M_PI / 5 here, different from above
         Robot r("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 5);
+        RobotEvolver evolver;
 
         // update at 0.5, 1, 5 and 10 seconds
         VectorXd expected_state = VectorXd::Zero(5);
         VectorXd robot_state = r.get_robot_state();
 
-        r.update_state(0.5);
+        evolver.update_state(r, 0.5);
         CHECK( r.get_t() == 0.6 );
         expected_state << 1.038947986819, 2.054092089229, -1.256637061436, 0.500000000000, 0.628318530718;
         robot_state = r.get_robot_state();
         REQUIRE( (robot_state.rows() == expected_state.rows() && robot_state.cols() == expected_state.cols()) );
         CHECK( robot_state.isApprox(expected_state) );
 
-        r.update_state(1);
+        evolver.update_state(r, 1);
         expected_state << 1.328030073565, 1.656204731499, -0.628318530718, 0.500000000000, 0.628318530718;
         robot_state = r.get_robot_state();
         CHECK( robot_state.isApprox(expected_state) );
 
-        r.update_state(5);
+        evolver.update_state(r, 5);
         expected_state << 2.263519357354, 2.943795268501, 2.513274122872, 0.500000000000, 0.628318530718;
         robot_state = r.get_robot_state();
         CHECK( robot_state.isApprox(expected_state) );
 
-        r.update_state(10);
+        evolver.update_state(r, 10);
         expected_state << 2.263519357354, 2.943795268501, 2.513274122872, 0.500000000000, 0.628318530718;
         robot_state = r.get_robot_state();
         CHECK( robot_state.isApprox(expected_state) );
@@ -149,17 +156,17 @@ TEST_CASE ( "Basic robot functions:" ) {
         // set w to 0, test again
         r.set_w(0.0);
 
-        r.update_state(0.5);
+        evolver.update_state(r, 0.5);
         expected_state << 2.061265108760, 3.090741581574, 2.513274122872, 0.500000000000, 0.000000000000;
         robot_state = r.get_robot_state();
         CHECK( robot_state.isApprox(expected_state) );
 
-        r.update_state(1);
+        evolver.update_state(r, 1);
         expected_state << 1.656756611573, 3.384634207720, 2.513274122872, 0.500000000000, 0.000000000000;
         robot_state = r.get_robot_state();
         CHECK( robot_state.isApprox(expected_state) );
 
-        r.update_state(5);
+        evolver.update_state(r, 5);
         CHECK( r.get_t() == 0.1 + 16.5 + 6.5 );
         expected_state << -0.365785874365, 4.854097338451, 2.513274122872, 0.500000000000, 0.000000000000;
         robot_state = r.get_robot_state();
@@ -167,36 +174,34 @@ TEST_CASE ( "Basic robot functions:" ) {
 
         // test that if w is small, it uses the `w = 0` motion model
         r.set_w(0.00001);
-        r.update_state(10);
+        evolver.update_state(r, 10);
         expected_state << -4.410870846240, 7.793023599913, 2.513274122872, 0.500000000000, 0.000010000000;
         robot_state = r.get_robot_state();
         CHECK( robot_state.isApprox(expected_state) );
 
         // STEP_FORWARD
         Robot r2("kat bot 2", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 5);
-        r2.step_forward();
+        evolver.step_forward(r2);
         robot_state = r2.get_robot_state();
         double robot_t = r2.get_t();
 
         Robot r3("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 5);
-        r3.update_state(r3.get_step());
+        evolver.update_state(r3, evolver.get_step());
 
         CHECK( robot_t == r3.get_t() );
         CHECK( robot_state == r3.get_robot_state() );
     }
 
-    SECTION ( "Random motions" ) {
-        Robot r("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 5);
+    // SECTION ( "Random motions" ) {
+    //     Robot r("kat bot", 0.1, 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 5);
 
-        SECTION ( "Random straight move" ) {
-            r.random_strt();
+    //     SECTION ( "Random straight move" ) {
 
-            CHECK ( r.get_m_start() == 0.1 );
-            CHECK ( r.get_m_end() > 0.1 ); // statistical test, unlikely but not impossible to be false
-            CHECK ( r.get_v() > 1 ); // statistical test, unlikely but not impossible to be false
-            CHECK ( r.get_v() < 50 ); // statistical test, unlikely but not impossible to be false
-            CHECK ( r.get_w() == 0 );
+    //         // CHECK ( r.get_m_start() == 0.1 );
+    //         // CHECK ( r.get_m_end() > 0.1 ); // statistical test, unlikely but not impossible to be false
+    //         // CHECK ( r.get_v() > 1 ); // statistical test, unlikely but not impossible to be false
+    //         // CHECK ( r.get_v() < 50 ); // statistical test, unlikely but not impossible to be false
 
-        }
-    }
+    //     }
+    // }
 }

@@ -3,23 +3,8 @@
 
 Status: writing dims check for state vector comparison, should revisit test writing as it may be wrong.
 
-- [x] convert utils to non-class
-- [ ] Build up random movement feature
-    - [x] step forward feature
-        - [x] step var
-        - [x] step forward
-    - [ ] random straight
-        - [x] random velocity params
-        - [x] random length of time params
-        - [ ] new_random_strt
-- [ ] make adjustments based on Ben's code review
-    - [ ] sort out what to do about impact of `const int robot_dims = 5;`
-    - [ ] sort out what to do about passing a robot as `const` to `<<`
-- [ ] more random maneuvers
-    - [ ] random left turn
-    - [ ] random right turn
-    - [ ] add random changes
-    - [ ] bias random changes toward origin
+- [x] replaced Robot update functions with separate class RobotEvolver
+- [ ] Design random movement feature
 
 ## later, nth, as needed, notes
 
