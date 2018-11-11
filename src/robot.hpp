@@ -85,6 +85,8 @@ void Robot::set_w(double new_w) { state(4) = new_w; }
 
 // Overload << for Robot output
 std::ostream& operator<< (std::ostream& stream, Robot& robot) {
+    std::ios::fmtflags current_flags = std::cout.flags();  // store current cout formatting flags
+
     std::cout << std::fixed << std::setprecision(6);
     std::cout << "\""
               << robot.get_name() << "\", "
@@ -95,6 +97,8 @@ std::ostream& operator<< (std::ostream& stream, Robot& robot) {
               << robot.get_v() << ", "
               << robot.get_w()
               << std::endl;
+
+    std::cout.flags(current_flags); // restore cout formatting flags
     return stream;
 }
 

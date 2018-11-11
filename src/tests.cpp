@@ -92,7 +92,7 @@ TEST_CASE ( "Basic robot functions:" ) {
         CHECK( r.get_robot_state() == expected_state );
 
         expected_state.resize(33);
-        REQUIRE_THROWS_WITH(r.set_state(expected_state), "Attempting to set new state with wrong dimensions");
+        CHECK_THROWS_WITH(r.set_state(expected_state), "Attempting to set new state with wrong dimensions");
     }
 
     SECTION ( "Check wrap on initialization" ) {
@@ -116,6 +116,17 @@ TEST_CASE ( "Basic robot functions:" ) {
         std::string buffer_output = buffer.str();
 
         std::string expected_output = "\"kat bot\", 0.100000, 1.000000, 2.300000, -1.570796, 0.500000, 0.314159\n";
+
+        CHECK( buffer_output == expected_output );
+
+        // check that precision and fixed are unset
+
+        buffer.str("");
+        std::cout << "1.0 printed as: " << 1.0 << std::endl;
+        std::cout << "0.0001 printed as: " << 0.0001 << std::endl;
+        buffer_output = buffer.str();
+
+        expected_output = "1.0 printed as: 1\n0.0001 printed as: 0.0001\n";
 
         CHECK( buffer_output == expected_output );
 
