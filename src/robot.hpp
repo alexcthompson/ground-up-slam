@@ -13,8 +13,6 @@ using Eigen::VectorXd;
 
 class Robot {
     private:
-        const int robot_dims = 5; // gives the dimensions of the robot state, all other dims are for the map
-
         std::string name;
         double t;     // last update
         VectorXd state = VectorXd::Constant(5, -666); // full state, including mappoint coordinates
@@ -22,16 +20,15 @@ class Robot {
     public:
         Robot(std::string name_, double t_, double x_, double y_, double theta_, double v_, double w_);
 
-        int get_robot_dims();
-        std::string get_name();
+        std::string get_name() const;
 
-        VectorXd get_robot_state();
-        double get_t();
-        double get_x();
-        double get_y();
-        double get_theta();
-        double get_v();
-        double get_w();
+        VectorXd get_robot_state() const;
+        double get_t() const;
+        double get_x() const;
+        double get_y() const;
+        double get_theta() const;
+        double get_v() const;
+        double get_w() const;
 
         void set_t(double new_t);
         void set_state(VectorXd new_state);
@@ -50,23 +47,21 @@ Robot::Robot(std::string name_, double t_, double x_, double y_, double theta_, 
              wrap_angle(w_);
 }
 
-int Robot::get_robot_dims() { return robot_dims; }
+std::string Robot::get_name() const { return name; }
 
-std::string Robot::get_name() { return name; }
+VectorXd Robot::get_robot_state() const { return state; }
 
-VectorXd Robot::get_robot_state() { return state; }
+double Robot::get_t() const { return t; }
 
-double Robot::get_t() { return t; }
+double Robot::get_x() const { return state(0); }
 
-double Robot::get_x() { return state(0); }
+double Robot::get_y() const { return state(1); }
 
-double Robot::get_y() { return state(1); }
+double Robot::get_theta() const { return state(2); }
 
-double Robot::get_theta() { return state(2); }
+double Robot::get_v() const { return state(3); }
 
-double Robot::get_v() { return state(3); }
-
-double Robot::get_w() { return state(4); }
+double Robot::get_w() const { return state(4); }
 
 void Robot::set_t(double new_t) { t = new_t; }
 
@@ -84,7 +79,7 @@ void Robot::set_w(double new_w) { state(4) = new_w; }
 
 
 // Overload << for Robot output
-std::ostream& operator<< (std::ostream& stream, Robot& robot) {
+std::ostream& operator<< (std::ostream& stream, const Robot& robot) {
     std::ios::fmtflags current_flags = std::cout.flags();  // store current cout formatting flags
 
     std::cout << std::fixed << std::setprecision(6);

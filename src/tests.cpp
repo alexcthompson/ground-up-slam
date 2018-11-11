@@ -50,8 +50,6 @@ TEST_CASE ( "Basic robot functions:" ) {
         expected_state << 1.0, 2.3, -M_PI / 2, 0.5, M_PI / 10;
         VectorXd robot_state = r.get_robot_state();
 
-        CHECK( r.get_robot_dims() == robot_state.rows() );
-
         // REQUIRE these since C++ throws SIGABRT if matrix dimensions don't match
         REQUIRE( (robot_state.rows() == expected_state.rows() && robot_state.cols() == expected_state.cols()) );
         CHECK( robot_state.isApprox(expected_state) );
